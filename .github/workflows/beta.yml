@@ -95,7 +95,7 @@ jobs:
 
       - name: Build Android APK
         env:
-          ORG_GRADLE_PROJECT_versionName: "1.1-beta.${{ github.run_number }}"
+          ORG_GRADLE_PROJECT_versionName: "beta-${{ github.run_number }}"
         run: |
           chmod +x android/build.sh android/gradlew
           cd android
