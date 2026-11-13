@@ -45,7 +45,6 @@ jobs:
             "platforms;android-36" \
             "ndk;30.0.16138531" \
             "cmake;3.22.1" \
-            "cmake;3.25.0"
 
       - name: Install Host Build Dependencies
         run: |
