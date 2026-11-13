@@ -59,6 +59,30 @@ jobs:
             libpulse-dev libasound2-dev libudev-dev \
             libdecor-0-dev
 
+      - name: Decrypt Game Executable
+        shell: bash
+        env:
+          XBE_KEY: ${{ secrets.XBE_KEY }}
+        run: |
+          if [ -f ci/default.xbe.enc ]; then
+            if [ -z "${XBE_KEY}" ]; then
+              echo "::error::GitHub Secret XBE_KEY is not configured."
+              exit 1
+            fi
+            mkdir -p assets
+            openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -md sha256 \\
+              -in ci/default.xbe.enc \\
+              -out assets/default.xbe \\
+              -pass env:XBE_KEY
+            test -s assets/default.xbe || {
+              echo "::error::Decrypted default.xbe is empty."
+              exit 1
+            }
+            echo "default.xbe decrypted successfully."
+          else
+            echo "ci/default.xbe.enc not found; continuing with separate ISO/assets if provided."
+          fi
+
       - name: Validate Game Assets
         shell: bash
         run: |
