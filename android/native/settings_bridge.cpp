@@ -26,7 +26,7 @@ namespace {
 enum Key : int {
     kResolution, kMsaa, kSmaa, kFxaa, kAniso, kBloom, kFog, kHdr, kHdrAvailable, kScreenFilter, kVsync, kFpsCap,
     kFrameRate60, kFpsCounter, kTouchSensitivity, kTouchInvertY, kControlsOpacity, kMouseLook, kMouseSensitivity,
-    kMouseInvertY, kVolume, kOutWidth, kOutHeight, kFrameSkip, kAsyncShaders, kShadows, kGyroLook, kGyroSensitivity, kGyroInvertY,
+    kMouseInvertY, kVolume, kOutWidth, kOutHeight, kFrameSkip, kAsyncShaders, kShadows, kGyroMode, kGyroSensitivity, kGyroInvertY,
     kInfiniteHealth, kInfiniteAmmo, kKeyCount
 };
 
@@ -35,7 +35,7 @@ const char* const kKeyNames[] = {
     "render_percent", "msaa", "smaa", "fxaa", "anisotropic_filtering", "bloom", "fog", "hdr_output", "hdr_available",
     "screen_filter", "vsync", "fps_cap", "frame_rate_60", "fps_counter", "touch_sensitivity", "touch_invert_y",
     "controls_opacity", "mouse_look", "mouse_sensitivity", "mouse_invert_y", "volume", "out_width", "out_height",
-    "frame_skip", "async_shaders", "shadows", "gyro_look", "gyro_sensitivity", "gyro_invert_y", "infinite_health", "infinite_ammo",
+    "frame_skip", "async_shaders", "shadows", "gyro_mode", "gyro_sensitivity", "gyro_invert_y", "infinite_health", "infinite_ammo",
 };
 static_assert(sizeof(kKeyNames) / sizeof(kKeyNames[0]) == kKeyCount);
 
@@ -124,7 +124,7 @@ extern "C" JNIEXPORT jintArray JNICALL Java_com_datfooldive_cgt_CGTActivity_nati
     v[kFrameSkip] = o.frame_skip;
     v[kAsyncShaders] = o.async_shaders;
     v[kShadows] = o.shadows;
-    v[kGyroLook] = o.gyro_look;
+    v[kGyroMode] = jint(o.gyro_mode);
     v[kGyroSensitivity] = jint(o.gyro_sensitivity);
     v[kGyroInvertY] = o.gyro_invert_y;
     v[kInfiniteHealth] = o.infinite_health;
@@ -158,7 +158,7 @@ extern "C" JNIEXPORT void JNICALL Java_com_datfooldive_cgt_CGTActivity_nativeSet
         case kFpsCounter: o.fps_counter = value != 0; break;
         case kInfiniteHealth: o.infinite_health = value != 0; break;
         case kInfiniteAmmo: o.infinite_ammo = value != 0; break;
-        case kGyroLook: o.gyro_look = value != 0; break;
+        case kGyroMode: o.gyro_mode = uint32_t(std::clamp<jint>(value, 0, 2)); break;
         case kGyroSensitivity: o.gyro_sensitivity = uint32_t(std::clamp<jint>(value, 10, 500)); break;
         case kGyroInvertY: o.gyro_invert_y = value != 0; break;
         case kTouchSensitivity: o.touch_sensitivity = uint32_t(std::clamp<jint>(value, 10, 500)); break;
