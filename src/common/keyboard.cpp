@@ -90,7 +90,7 @@ void OnGyroLook(float yaw, float pitch) {
     g_gyro_y += pitch;
 }
 
-bool TakeLook(float& yaw, float& pitch) {
+bool TakeLook(float& yaw, float& pitch, bool aiming) {
     uint64_t now = NowMs();
     double mx, my, tx, ty, gx, gy;
     {
@@ -114,7 +114,7 @@ bool TakeLook(float& yaw, float& pitch) {
         yaw += float(tx) * degrees;
         pitch += float(o.touch_invert_y ? -ty : ty) * degrees;
     }
-    if (o.gyro_look) {
+    if (o.gyro_mode == 2 || (o.gyro_mode == 1 && aiming)) {
         float scale = float(o.gyro_sensitivity) * 0.01f;
         yaw += float(gx) * scale;
         pitch += float(o.gyro_invert_y ? -gy : gy) * scale;
