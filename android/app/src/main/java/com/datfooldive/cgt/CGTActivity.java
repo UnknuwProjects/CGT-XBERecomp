@@ -170,8 +170,8 @@ public class CGTActivity extends SDLActivity {
 
     private void reloadGyro() {
         int[] values = nativeSettings();
-        gyroEnabled = values != null && values.length > SettingsDialog.GYRO_LOOK
-                && values[SettingsDialog.GYRO_LOOK] != 0;
+        gyroEnabled = values != null && values.length > SettingsDialog.GYRO_MODE
+                && values[SettingsDialog.GYRO_MODE] != 0;
         updateGyro();
     }
 
