@@ -24,13 +24,13 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           submodules: recursive
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "17"
@@ -94,6 +94,8 @@ jobs:
           fi
 
       - name: Build Android APK
+        env:
+          ORG_GRADLE_PROJECT_versionName: "1.1-beta.${{ github.run_number }}"
         run: |
           chmod +x android/build.sh android/gradlew
           cd android
@@ -114,7 +116,7 @@ jobs:
             "beta/${{ inputs.build_name }}-${GITHUB_RUN_NUMBER}.apk"
 
       - name: Upload Beta Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ inputs.build_name }}-${{ github.run_number }}
           path: beta/*.apk
