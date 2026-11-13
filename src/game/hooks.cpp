@@ -235,9 +235,10 @@ bool MouseLook(uint32_t character, float& yaw, float& pitch) {
     bool any_pad = input && R32(input + kInputAnyPad) != 0;
     // the mouse is on port 0: player 1, or the one player of a game taken by any controller
     if (player == 0xFFFFFFFFu || (player != 0 && !any_pad)) return false;
-    if (!input::TakeLook(yaw, pitch)) return false;
     float zoom = RF(control + kControlZoom);
     if (!(zoom > 0.0f && zoom <= 1.0f)) zoom = 1.0f;
+    // The title's zoom ratio drops below 1 while the player aims through the weapon/scope.
+    if (!input::TakeLook(yaw, pitch, zoom < 0.999f)) return false;
     yaw *= zoom;
     pitch *= zoom;
     return true;
