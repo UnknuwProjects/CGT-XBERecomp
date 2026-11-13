@@ -1,0 +1,138 @@
+name: Build Release
+
+on:
+  push:
+    tags:
+      - "*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build Android Release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK Components
+        run: |
+          sdkmanager \
+            "platform-tools" \
+            "platforms;android-36" \
+            "ndk;30.0.16138531" \
+            "cmake;3.22.1" \
+            "cmake;3.25.0"
+
+      - name: Install Host Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang lld cmake ninja-build git pkg-config \
+            build-essential python3 \
+            libvulkan-dev libshaderc-dev \
+            libx11-dev libxext-dev libwayland-dev \
+            libxkbcommon-dev libpipewire-0.3-dev \
+            libpulse-dev libasound2-dev libudev-dev \
+            libdecor-0-dev
+
+      - name: Validate Game Assets
+        shell: bash
+        run: |
+          if [ ! -f assets/default.xbe ] && \
+             ! compgen -G "assets/*.iso" > /dev/null && \
+             ! compgen -G "assets/*.ISO" > /dev/null; then
+            echo "::error::Game files are missing from assets/."
+            echo "Provide a legally acquired ISO or default.xbe and its data files."
+            exit 1
+          fi
+
+      - name: Generate What's New
+        shell: bash
+        run: |
+          CURRENT_TAG="${GITHUB_REF_NAME}"
+          PREVIOUS_TAG="$(git describe --tags --abbrev=0 "${GITHUB_SHA}^" 2>/dev/null || true)"
+
+          {
+            echo "# What's New"
+            echo
+            echo "**Version:** ${CURRENT_TAG}"
+            echo
+
+            if [ -n "${PREVIOUS_TAG}" ]; then
+              echo "**Changes since:** ${PREVIOUS_TAG}"
+              echo
+              echo "## Commits"
+              git log "${PREVIOUS_TAG}..${GITHUB_SHA}" \
+                --pretty=format:'- %s (%h)' --no-merges
+              echo
+              echo
+              echo "## Changed Files"
+              git diff --stat "${PREVIOUS_TAG}..${GITHUB_SHA}"
+            else
+              echo "## Commits"
+              git log "${GITHUB_SHA}" --pretty=format:'- %s (%h)' --no-merges
+              echo
+              echo
+              echo "## Changed Files"
+              git show --stat --oneline "${GITHUB_SHA}"
+            fi
+          } > RELEASE_NOTES.md
+
+          cat RELEASE_NOTES.md
+
+      - name: Build Android APK
+        run: |
+          chmod +x android/build.sh android/gradlew
+          cd android
+          ./build.sh
+
+      - name: Verify APK
+        run: |
+          APK="android/app/build/outputs/apk/release/app-release.apk"
+          test -s "$APK" || {
+            echo "::error::APK was not generated."
+            exit 1
+          }
+
+      - name: Prepare Release Files
+        run: |
+          mkdir -p release
+          cp android/app/build/outputs/apk/release/app-release.apk \
+            "release/CGT-XBERecomp-${GITHUB_REF_NAME}.apk"
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CGT-XBERecomp-${{ github.ref_name }}
+          path: release/*.apk
+          retention-days: 30
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: CGT-XBERecomp ${{ github.ref_name }}
+          body_path: RELEASE_NOTES.md
+          files: release/*.apk
+          draft: false
+          prerelease: false
