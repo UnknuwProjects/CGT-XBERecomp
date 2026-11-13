@@ -24,6 +24,9 @@ void Load(const void* table) {
     o.screen_filter = std::min(uint32_t(t["screen_filter"].value_or(int64_t(o.screen_filter))), uint32_t(kFilterHdr));
     o.mouse_sensitivity = std::clamp(o.mouse_sensitivity, uint32_t(5), uint32_t(1000));
 #ifdef __ANDROID__
+    if (!t.contains("gyro_mode")) o.gyro_mode = t["gyro_look"].value_or(false) ? 2u : 0u;
+#endif
+#ifdef __ANDROID__
     o.gyro_sensitivity = std::clamp(o.gyro_sensitivity, uint32_t(10), uint32_t(500));
     o.touch_sensitivity = std::clamp(o.touch_sensitivity, uint32_t(10), uint32_t(500));
     o.controls_opacity = std::clamp(o.controls_opacity, uint32_t(0), uint32_t(100));
@@ -72,7 +75,7 @@ const app::GameInfo app::kGame = {
 #ifdef __ANDROID__
         {"infinite_health", &game::Opt().infinite_health, nullptr},
         {"infinite_ammo", &game::Opt().infinite_ammo, nullptr},
-        {"gyro_look", &game::Opt().gyro_look, nullptr},
+        {"gyro_mode", nullptr, &game::Opt().gyro_mode},
         {"gyro_sensitivity", nullptr, &game::Opt().gyro_sensitivity},
         {"gyro_invert_y", &game::Opt().gyro_invert_y, nullptr},
         {"touch_sensitivity", nullptr, &game::Opt().touch_sensitivity},
