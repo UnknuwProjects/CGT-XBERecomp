@@ -1,0 +1,98 @@
+name: Beta Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_name:
+        description: "Name for this beta build"
+        required: true
+        default: "CGT-XBERecomp-Beta"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: beta-build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build Beta APK
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK Components
+        run: |
+          sdkmanager \
+            "platform-tools" \
+            "platforms;android-36" \
+            "ndk;30.0.16138531" \
+            "cmake;3.22.1" \
+            "cmake;3.25.0"
+
+      - name: Install Host Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang lld cmake ninja-build git pkg-config \
+            build-essential python3 \
+            libvulkan-dev libshaderc-dev \
+            libx11-dev libxext-dev libwayland-dev \
+            libxkbcommon-dev libpipewire-0.3-dev \
+            libpulse-dev libasound2-dev libudev-dev \
+            libdecor-0-dev
+
+      - name: Validate Game Assets
+        shell: bash
+        run: |
+          if [ ! -f assets/default.xbe ] && \
+             ! compgen -G "assets/*.iso" > /dev/null && \
+             ! compgen -G "assets/*.ISO" > /dev/null; then
+            echo "::error::Game files are missing from assets/."
+            echo "Provide a legally acquired ISO or default.xbe and its data files."
+            exit 1
+          fi
+
+      - name: Build Android APK
+        run: |
+          chmod +x android/build.sh android/gradlew
+          cd android
+          ./build.sh
+
+      - name: Verify APK
+        run: |
+          APK="android/app/build/outputs/apk/release/app-release.apk"
+          test -s "$APK" || {
+            echo "::error::APK was not generated."
+            exit 1
+          }
+
+      - name: Prepare Beta Artifact
+        run: |
+          mkdir -p beta
+          cp android/app/build/outputs/apk/release/app-release.apk \
+            "beta/${{ inputs.build_name }}-${GITHUB_RUN_NUMBER}.apk"
+
+      - name: Upload Beta Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.build_name }}-${{ github.run_number }}
+          path: beta/*.apk
+          retention-days: 7
