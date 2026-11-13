@@ -20,7 +20,7 @@ void OnGyroLook(float yaw, float pitch);
 // game thread: the turn asked for since the last take in degrees, each source's sensitivity and invert Y applied, x
 // right and y down, before the zoom's scaling; false when there is none. Motion that waited longer than a moment (the
 // game paused, a cutscene, a menu) is dropped rather than turned all at once.
-bool TakeLook(float& yaw, float& pitch);
+bool TakeLook(float& yaw, float& pitch, bool aiming = false);
 
 }  // namespace input
 
