@@ -35,7 +35,7 @@ struct Options {
     bool touch_invert_y = false;
     bool infinite_health = false;
     bool infinite_ammo = false;
-    bool gyro_look = false;
+    uint32_t gyro_mode = 0;  // 0 off, 1 while aiming, 2 always on
     uint32_t gyro_sensitivity = 100;  // percent: 100 turns one degree per degree of device rotation
     bool gyro_invert_y = false;
     uint32_t controls_opacity = 100;   // the on-screen controls, percent
