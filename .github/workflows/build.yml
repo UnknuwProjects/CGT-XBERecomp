@@ -32,7 +32,7 @@ jobs:
           java-version: "17"
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: Install Android SDK Components
         run: |
@@ -41,7 +41,6 @@ jobs:
             "platforms;android-36" \
             "ndk;30.0.16138531" \
             "cmake;3.22.1" \
-            "cmake;3.25.0"
 
       - name: Install Host Build Dependencies
         run: |
@@ -66,9 +65,9 @@ jobs:
               exit 1
             fi
             mkdir -p assets
-            openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -md sha256 \\
-              -in ci/default.xbe.enc \\
-              -out assets/default.xbe \\
+            openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -md sha256 \
+              -in ci/default.xbe.enc \
+              -out assets/default.xbe \
               -pass env:XBE_KEY
             test -s assets/default.xbe || {
               echo "::error::Decrypted default.xbe is empty."
