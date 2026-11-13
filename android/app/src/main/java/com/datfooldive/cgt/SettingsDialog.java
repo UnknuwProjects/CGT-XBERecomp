@@ -31,7 +31,7 @@ class SettingsDialog extends Dialog {
             HDR_AVAILABLE = 8, SCREEN_FILTER = 9, VSYNC = 10, FPS_CAP = 11, FRAME_RATE_60 = 12, FPS_COUNTER = 13,
             TOUCH_SENSITIVITY = 14, TOUCH_INVERT_Y = 15, OPACITY = 16, MOUSE_LOOK = 17, MOUSE_SENSITIVITY = 18,
             MOUSE_INVERT_Y = 19, VOLUME = 20, OUT_W = 21, OUT_H = 22, FRAME_SKIP = 23, ASYNC_SHADERS = 24, SHADOWS = 25,
-            GYRO_LOOK = 26, GYRO_SENSITIVITY = 27, GYRO_INVERT_Y = 28,
+            GYRO_MODE = 26, GYRO_SENSITIVITY = 27, GYRO_INVERT_Y = 28,
             INFINITE_HEALTH = 29, INFINITE_AMMO = 30, COUNT = 31;
 
     private static final int BG = Theme.BG, TEXT = Theme.TEXT, FRAME = Theme.FRAME,
@@ -199,7 +199,8 @@ class SettingsDialog extends Dialog {
 
         heading(box, "GYROSCOPE");
         if (activity.hasGyroscope()) {
-            toggle(box, "GYRO LOOK", GYRO_LOOK);
+            stepper(box, "GYRO MODE", new String[] {"OFF", "WHILE AIM", "ALWAYS ON"},
+                    new int[] {0, 1, 2}, GYRO_MODE);
             slider(box, "GYRO SENSITIVITY", GYRO_SENSITIVITY, 10, 500, 5, SettingsDialog::scale);
             toggle(box, "GYRO INVERT Y", GYRO_INVERT_Y);
         } else {
