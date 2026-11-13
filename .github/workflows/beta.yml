@@ -36,7 +36,7 @@ jobs:
           java-version: "17"
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: Install Android SDK Components
         run: |
@@ -86,8 +86,8 @@ jobs:
       - name: Validate Game Assets
         shell: bash
         run: |
-          if [ ! -f assets/default.xbe ] && \
-             ! compgen -G "assets/*.iso" > /dev/null && \
+          if [ ! -f assets/default.xbe ] && \\
+             ! compgen -G "assets/*.iso" > /dev/null && \\
              ! compgen -G "assets/*.ISO" > /dev/null; then
             echo "::error::Game files are missing from assets/."
             echo "Provide a legally acquired ISO or default.xbe and its data files."
